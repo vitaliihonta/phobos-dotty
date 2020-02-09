@@ -11,14 +11,11 @@ package ru.tinkoff.phobos
  *
  * See package annotations for more convenient syntax.
  */
-trait Namespace[T] {
+trait Namespace[T] with
   val getNamespace: String
-}
 
-object Namespace {
-  def mkInstance[T](uri: String): Namespace[T] = new Namespace[T] {
-    val getNamespace: String = uri
-  }
+object Namespace with
+  def mkInstance[T](uri: String): Namespace[T] = new Namespace[T] with
+    val getNamespace = uri
 
   def apply[T](implicit instance: Namespace[T]): Namespace[T] = instance
-}

@@ -18,15 +18,15 @@ import ru.tinkoff.phobos.Namespace
  *
  * This typeclass wraps ElementEncoder[A] and provides element name and StreamWriter.
  */
-trait XmlEncoder[A] {
+trait XmlEncoder[A] with
   val localname: String
   val namespaceuri: Option[String]
   val elementencoder: ElementEncoder[A]
 
   def encode(a: A, charset: String = "UTF-8"): String =
-    new String(encodeToBytes(a, charset), charset)
+    String(encodeToBytes(a, charset), charset)
 
-  def encodeToBytes(a: A, charset: String = "UTF-8"): Array[Byte] = {
+  def encodeToBytes(a: A, charset: String = "UTF-8"): Array[Byte] = 
     val os      = new ByteArrayOutputStream
     val factory = new OutputFactoryImpl
     factory.setProperty("javax.xml.stream.isRepairingNamespaces", true)
@@ -37,20 +37,20 @@ trait XmlEncoder[A] {
     sw.flush()
     sw.close()
     os.toByteArray
-  }
-}
+  
+end XmlEncoder
 
-object XmlEncoder {
+object XmlEncoder with
 
-  def apply[A](implicit instance: XmlEncoder[A]): XmlEncoder[A] = instance
+  def apply[A](using instance: XmlEncoder[A]): XmlEncoder[A] = instance
 
   def fromElementEncoder[A](localName: String, namespaceUri: Option[String])(
-      implicit elementEncoder: ElementEncoder[A]): XmlEncoder[A] =
-    new XmlEncoder[A] {
+      using elementEncoder: ElementEncoder[A]): XmlEncoder[A] =
+    new XmlEncoder[A] with
       val localname: String                 = localName
       val namespaceuri: Option[String]      = namespaceUri
       val elementencoder: ElementEncoder[A] = elementEncoder
-    }
+  end fromElementEncoder
 
   def fromElementEncoder[A](localName: String)(implicit elementEncoder: ElementEncoder[A]): XmlEncoder[A] =
     fromElementEncoder(localName, None)
@@ -62,4 +62,4 @@ object XmlEncoder {
   def fromElementEncoderNs[A, NS](localName: String)(implicit elementEncoder: ElementEncoder[A],
                                                      namespace: Namespace[NS]): XmlEncoder[A] =
     fromElementEncoder(localName, namespace.getNamespace.some)
-}
+end XmlEncoder
