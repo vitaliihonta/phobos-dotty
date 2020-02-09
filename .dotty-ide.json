@@ -1,0 +1,33 @@
+[ {
+  "id" : "phobos/compile",
+  "compilerVersion" : "0.22.0-RC1",
+  "compilerArguments" : [ "-bootclasspath", "/usr/lib/jvm/jdk1.8.0_231/jre/lib/resources.jar:/usr/lib/jvm/jdk1.8.0_231/jre/lib/rt.jar:/usr/lib/jvm/jdk1.8.0_231/jre/lib/sunrsasign.jar:/usr/lib/jvm/jdk1.8.0_231/jre/lib/jsse.jar:/usr/lib/jvm/jdk1.8.0_231/jre/lib/jce.jar:/usr/lib/jvm/jdk1.8.0_231/jre/lib/charsets.jar:/usr/lib/jvm/jdk1.8.0_231/jre/lib/jfr.jar:/usr/lib/jvm/jdk1.8.0_231/jre/classes" ],
+  "sourceDirectories" : [ "/home/v.honta/IdeaProjects/phobos_dotty/src/main/scala-0.22", "/home/v.honta/IdeaProjects/phobos_dotty/src/main/scala", "/home/v.honta/IdeaProjects/phobos_dotty/src/main/java", "/home/v.honta/IdeaProjects/phobos_dotty/target/scala-0.22/src_managed/main" ],
+  "dependencyClasspath" : [ "/home/v.honta/.ivy2/cache/ch.epfl.lamp/dotty-library_0.22/jars/dotty-library_0.22-0.22.0-RC1.jar", "/home/v.honta/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.13.1.jar" ],
+  "classDirectory" : "/home/v.honta/IdeaProjects/phobos_dotty/target/scala-0.22/classes",
+  "projectDependencies" : [ ]
+}, {
+  "id" : "phobos/test",
+  "compilerVersion" : "0.22.0-RC1",
+  "compilerArguments" : [ "-bootclasspath", "/usr/lib/jvm/jdk1.8.0_231/jre/lib/resources.jar:/usr/lib/jvm/jdk1.8.0_231/jre/lib/rt.jar:/usr/lib/jvm/jdk1.8.0_231/jre/lib/sunrsasign.jar:/usr/lib/jvm/jdk1.8.0_231/jre/lib/jsse.jar:/usr/lib/jvm/jdk1.8.0_231/jre/lib/jce.jar:/usr/lib/jvm/jdk1.8.0_231/jre/lib/charsets.jar:/usr/lib/jvm/jdk1.8.0_231/jre/lib/jfr.jar:/usr/lib/jvm/jdk1.8.0_231/jre/classes" ],
+  "sourceDirectories" : [ "/home/v.honta/IdeaProjects/phobos_dotty/src/test/scala-0.22", "/home/v.honta/IdeaProjects/phobos_dotty/src/test/scala", "/home/v.honta/IdeaProjects/phobos_dotty/src/test/java", "/home/v.honta/IdeaProjects/phobos_dotty/target/scala-0.22/src_managed/test" ],
+  "dependencyClasspath" : [ "/home/v.honta/IdeaProjects/phobos_dotty/target/scala-0.22/classes", "/home/v.honta/.ivy2/cache/ch.epfl.lamp/dotty-library_0.22/jars/dotty-library_0.22-0.22.0-RC1.jar", "/home/v.honta/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.13.1.jar" ],
+  "classDirectory" : "/home/v.honta/IdeaProjects/phobos_dotty/target/scala-0.22/test-classes",
+  "projectDependencies" : [ "phobos/compile" ]
+}, {
+  "id" : "core/compile",
+  "compilerVersion" : "0.22.0-RC1",
+  "compilerArguments" : [ "-bootclasspath", "/usr/lib/jvm/jdk1.8.0_231/jre/lib/resources.jar:/usr/lib/jvm/jdk1.8.0_231/jre/lib/rt.jar:/usr/lib/jvm/jdk1.8.0_231/jre/lib/sunrsasign.jar:/usr/lib/jvm/jdk1.8.0_231/jre/lib/jsse.jar:/usr/lib/jvm/jdk1.8.0_231/jre/lib/jce.jar:/usr/lib/jvm/jdk1.8.0_231/jre/lib/charsets.jar:/usr/lib/jvm/jdk1.8.0_231/jre/lib/jfr.jar:/usr/lib/jvm/jdk1.8.0_231/jre/classes", "-language:experimental.macros", "-Yindent-colons" ],
+  "sourceDirectories" : [ "/home/v.honta/IdeaProjects/phobos_dotty/modules/core/src/main/scala-0.22", "/home/v.honta/IdeaProjects/phobos_dotty/modules/core/src/main/scala", "/home/v.honta/IdeaProjects/phobos_dotty/modules/core/src/main/java", "/home/v.honta/IdeaProjects/phobos_dotty/modules/core/target/scala-0.22/src_managed/main" ],
+  "dependencyClasspath" : [ "/home/v.honta/.ivy2/cache/ch.epfl.lamp/dotty-library_0.22/jars/dotty-library_0.22-0.22.0-RC1.jar", "/home/v.honta/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.13.1.jar", "/home/v.honta/.ivy2/cache/org.typelevel/cats-core_2.13/jars/cats-core_2.13-2.0.0.jar", "/home/v.honta/.ivy2/cache/org.typelevel/cats-macros_2.13/jars/cats-macros_2.13-2.0.0.jar", "/home/v.honta/.ivy2/cache/org.typelevel/cats-kernel_2.13/jars/cats-kernel_2.13-2.0.0.jar", "/home/v.honta/.ivy2/cache/com.fasterxml/aalto-xml/bundles/aalto-xml-1.2.1.jar", "/home/v.honta/.ivy2/cache/org.codehaus.woodstox/stax2-api/bundles/stax2-api-4.2.jar" ],
+  "classDirectory" : "/home/v.honta/IdeaProjects/phobos_dotty/modules/core/target/scala-0.22/classes",
+  "projectDependencies" : [ ]
+}, {
+  "id" : "core/test",
+  "compilerVersion" : "0.22.0-RC1",
+  "compilerArguments" : [ "-bootclasspath", "/usr/lib/jvm/jdk1.8.0_231/jre/lib/resources.jar:/usr/lib/jvm/jdk1.8.0_231/jre/lib/rt.jar:/usr/lib/jvm/jdk1.8.0_231/jre/lib/sunrsasign.jar:/usr/lib/jvm/jdk1.8.0_231/jre/lib/jsse.jar:/usr/lib/jvm/jdk1.8.0_231/jre/lib/jce.jar:/usr/lib/jvm/jdk1.8.0_231/jre/lib/charsets.jar:/usr/lib/jvm/jdk1.8.0_231/jre/lib/jfr.jar:/usr/lib/jvm/jdk1.8.0_231/jre/classes", "-language:experimental.macros", "-Yindent-colons" ],
+  "sourceDirectories" : [ "/home/v.honta/IdeaProjects/phobos_dotty/modules/core/src/test/scala-0.22", "/home/v.honta/IdeaProjects/phobos_dotty/modules/core/src/test/scala", "/home/v.honta/IdeaProjects/phobos_dotty/modules/core/src/test/java", "/home/v.honta/IdeaProjects/phobos_dotty/modules/core/target/scala-0.22/src_managed/test" ],
+  "dependencyClasspath" : [ "/home/v.honta/IdeaProjects/phobos_dotty/modules/core/target/scala-0.22/classes", "/home/v.honta/.ivy2/cache/ch.epfl.lamp/dotty-library_0.22/jars/dotty-library_0.22-0.22.0-RC1.jar", "/home/v.honta/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.13.1.jar", "/home/v.honta/.ivy2/cache/org.typelevel/cats-core_2.13/jars/cats-core_2.13-2.0.0.jar", "/home/v.honta/.ivy2/cache/org.typelevel/cats-macros_2.13/jars/cats-macros_2.13-2.0.0.jar", "/home/v.honta/.ivy2/cache/org.typelevel/cats-kernel_2.13/jars/cats-kernel_2.13-2.0.0.jar", "/home/v.honta/.ivy2/cache/com.fasterxml/aalto-xml/bundles/aalto-xml-1.2.1.jar", "/home/v.honta/.ivy2/cache/org.codehaus.woodstox/stax2-api/bundles/stax2-api-4.2.jar", "/home/v.honta/.ivy2/cache/org.scalactic/scalactic_2.13/bundles/scalactic_2.13-3.0.8.jar", "/home/v.honta/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.13.0.jar", "/home/v.honta/.ivy2/cache/org.scalatest/scalatest_2.13/bundles/scalatest_2.13-3.0.8.jar", "/home/v.honta/.ivy2/cache/org.scala-lang.modules/scala-xml_2.13/bundles/scala-xml_2.13-1.2.0.jar" ],
+  "classDirectory" : "/home/v.honta/IdeaProjects/phobos_dotty/modules/core/target/scala-0.22/test-classes",
+  "projectDependencies" : [ "core/compile" ]
+} ]

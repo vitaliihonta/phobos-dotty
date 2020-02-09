@@ -4,7 +4,7 @@ import scala.annotation.StaticAnnotation
 /**
  * Syntax annotations for case class params. See ru.tinkoff.derivation.semiato docs for more explanation.
  */
-object syntax {
+object syntax with
 
   /**
    * Case class params with @attr annotation are treated as element attributes.
@@ -25,4 +25,3 @@ object syntax {
    * Allows to rename xml tag or attribute name while encoding and decoding
    */
   final class renamed(to: String) extends StaticAnnotation
-}

@@ -23,125 +23,116 @@ import org.codehaus.stax2.XMLStreamWriter2
  * This typeclass describes process of encoding some A value to XML document. Name of the element is
  * not defined in typeclass, it should be passed in encodeAsElement method.
  */
-trait ElementEncoder[A] { self =>
+trait ElementEncoder[A] with
+  self =>
   def encodeAsElement(a: A, sw: XMLStreamWriter2, localName: String, namespaceUri: Option[String]): Unit
 
   def contramap[B](f: B => A): ElementEncoder[B] =
-    new ElementEncoder[B] {
+    new ElementEncoder[B] with
       def encodeAsElement(b: B, sw: XMLStreamWriter2, localName: String, namespaceUri: Option[String]): Unit =
         self.encodeAsElement(f(b), sw, localName, namespaceUri)
-    }
-}
 
-object ElementEncoder {
-  implicit val encoderContravariant: Contravariant[ElementEncoder] =
-    new Contravariant[ElementEncoder] {
+end ElementEncoder
+
+object ElementEncoder with
+  given encoderContravariant: Contravariant[ElementEncoder] =
+    new Contravariant[ElementEncoder] with
       def contramap[A, B](fa: ElementEncoder[A])(f: B => A): ElementEncoder[B] = fa.contramap(f)
-    }
 
   /**
     * Instances
     */
-  implicit val stringEncoder: ElementEncoder[String] =
-    new ElementEncoder[String] {
-      def encodeAsElement(a: String, sw: XMLStreamWriter2, localName: String, namespaceUri: Option[String]): Unit = {
+  given stringEncoder: ElementEncoder[String] =
+    new ElementEncoder[String] with
+      def encodeAsElement(a: String, sw: XMLStreamWriter2, localName: String, namespaceUri: Option[String]): Unit =
         namespaceUri.fold(sw.writeStartElement(localName))(ns => sw.writeStartElement(ns, localName))
         sw.writeCharacters(a)
         sw.writeEndElement()
-      }
-    }
+  end stringEncoder
 
-  implicit val unitEncoder: ElementEncoder[Unit] =
-    new ElementEncoder[Unit] {
+  given unitEncoder: ElementEncoder[Unit] =
+    new ElementEncoder[Unit] with
       def encodeAsElement(a: Unit, sw: XMLStreamWriter2, localName: String, namespaceUri: Option[String]): Unit = ()
-    }
 
-  implicit val booleanEncoder: ElementEncoder[Boolean]                     = stringEncoder.contramap(_.toString)
-  implicit val javaBooleanEncoder: ElementEncoder[java.lang.Boolean]       = booleanEncoder.contramap(_.booleanValue())
-  implicit val charEncoder: ElementEncoder[Char]                           = stringEncoder.contramap(_.toString)
-  implicit val javaCharacterEncoder: ElementEncoder[java.lang.Character]   = charEncoder.contramap(_.charValue())
-  implicit val floatEncoder: ElementEncoder[Float]                         = stringEncoder.contramap(_.toString)
-  implicit val javaFloatEncoder: ElementEncoder[java.lang.Float]           = floatEncoder.contramap(_.floatValue())
-  implicit val doubleEncoder: ElementEncoder[Double]                       = stringEncoder.contramap(_.toString)
-  implicit val javaDoubleEncoder: ElementEncoder[java.lang.Double]         = doubleEncoder.contramap(_.doubleValue())
-  implicit val byteEncoder: ElementEncoder[Byte]                           = stringEncoder.contramap(_.toString)
-  implicit val javaByteEncoder: ElementEncoder[java.lang.Byte]             = byteEncoder.contramap(_.byteValue())
-  implicit val shortEncoder: ElementEncoder[Short]                         = stringEncoder.contramap(_.toString)
-  implicit val javaShortEncoder: ElementEncoder[java.lang.Short]           = shortEncoder.contramap(_.shortValue())
-  implicit val intEncoder: ElementEncoder[Int]                             = stringEncoder.contramap(_.toString)
-  implicit val javaIntegerEncoder: ElementEncoder[java.lang.Integer]       = intEncoder.contramap(_.intValue())
-  implicit val longEncoder: ElementEncoder[Long]                           = stringEncoder.contramap(_.toString)
-  implicit val javaLongEncoder: ElementEncoder[java.lang.Long]             = longEncoder.contramap(_.longValue())
-  implicit val bigIntEncoder: ElementEncoder[BigInt]                       = stringEncoder.contramap(_.toString)
-  implicit val javaBigIntegerEncoder: ElementEncoder[java.math.BigInteger] = bigIntEncoder.contramap(BigInt.apply)
-  implicit val bigDecimalEncoder: ElementEncoder[BigDecimal]               = stringEncoder.contramap(_.toString)
-  implicit val javaBigDecimalEncoder: ElementEncoder[java.math.BigDecimal] =
+  given booleanEncoder: ElementEncoder[Boolean]                     = stringEncoder.contramap(_.toString)
+  given javaBooleanEncoder: ElementEncoder[java.lang.Boolean]       = booleanEncoder.contramap(_.booleanValue())
+  given charEncoder: ElementEncoder[Char]                           = stringEncoder.contramap(_.toString)
+  given javaCharacterEncoder: ElementEncoder[java.lang.Character]   = charEncoder.contramap(_.charValue())
+  given floatEncoder: ElementEncoder[Float]                         = stringEncoder.contramap(_.toString)
+  given javaFloatEncoder: ElementEncoder[java.lang.Float]           = floatEncoder.contramap(_.floatValue())
+  given doubleEncoder: ElementEncoder[Double]                       = stringEncoder.contramap(_.toString)
+  given javaDoubleEncoder: ElementEncoder[java.lang.Double]         = doubleEncoder.contramap(_.doubleValue())
+  given byteEncoder: ElementEncoder[Byte]                           = stringEncoder.contramap(_.toString)
+  given javaByteEncoder: ElementEncoder[java.lang.Byte]             = byteEncoder.contramap(_.byteValue())
+  given shortEncoder: ElementEncoder[Short]                         = stringEncoder.contramap(_.toString)
+  given javaShortEncoder: ElementEncoder[java.lang.Short]           = shortEncoder.contramap(_.shortValue())
+  given intEncoder: ElementEncoder[Int]                             = stringEncoder.contramap(_.toString)
+  given javaIntegerEncoder: ElementEncoder[java.lang.Integer]       = intEncoder.contramap(_.intValue())
+  given longEncoder: ElementEncoder[Long]                           = stringEncoder.contramap(_.toString)
+  given javaLongEncoder: ElementEncoder[java.lang.Long]             = longEncoder.contramap(_.longValue())
+  given bigIntEncoder: ElementEncoder[BigInt]                       = stringEncoder.contramap(_.toString)
+  given javaBigIntegerEncoder: ElementEncoder[java.math.BigInteger] = bigIntEncoder.contramap(BigInt.apply)
+  given bigDecimalEncoder: ElementEncoder[BigDecimal]               = stringEncoder.contramap(_.toString)
+  given javaBigDecimalEncoder: ElementEncoder[java.math.BigDecimal] =
     bigDecimalEncoder.contramap(BigDecimal.apply)
-  implicit val UUIDEncoder: ElementEncoder[UUID] = stringEncoder.contramap(_.toString)
+  given UUIDEncoder: ElementEncoder[UUID] = stringEncoder.contramap(_.toString)
 
-  implicit val base64Encoder: ElementEncoder[Array[Byte]] = stringEncoder.contramap(Base64.getEncoder.encodeToString)
+  given base64Encoder: ElementEncoder[Array[Byte]] = stringEncoder.contramap(Base64.getEncoder.encodeToString)
 
-  implicit def optionEncoder[A](implicit encoder: ElementEncoder[A]): ElementEncoder[Option[A]] =
-    new ElementEncoder[Option[A]] {
+  given optionEncoder[A](using encoder: ElementEncoder[A]) as ElementEncoder[Option[A]] =
+    new ElementEncoder[Option[A]] with
       def encodeAsElement(a: Option[A], sw: XMLStreamWriter2, localName: String, namespaceUri: Option[String]): Unit =
         a.foreach(encoder.encodeAsElement(_, sw, localName, namespaceUri))
-    }
 
-  implicit def someEncoder[A](implicit e: ElementEncoder[A]): ElementEncoder[Some[A]] = e.contramap(_.get)
+  given foldableEncoder[F[_]: Foldable, A](using encoder: ElementEncoder[A]) as ElementEncoder[F[A]] =
+    new ElementEncoder[F[A]] with
+      def encodeAsElement(vs: F[A], sw: XMLStreamWriter2, localName: String, namespaceUri: Option[String]): Unit =
+        Foldable[F].foldLeft(vs, ())((_, a) => encoder.encodeAsElement(a, sw, localName, namespaceUri))
 
-  implicit val noneEncoder: ElementEncoder[None.type] = unitEncoder.contramap(_ => ())
-
-  implicit def foldableEncoder[F[_]: Foldable, A](implicit encoder: ElementEncoder[A]): ElementEncoder[F[A]] =
-    new ElementEncoder[F[A]] {
-      def encodeAsElement(as: F[A], sw: XMLStreamWriter2, localName: String, namespaceUri: Option[String]): Unit =
-        Foldable[F].foldLeft(as, ())((_, a) => encoder.encodeAsElement(a, sw, localName, namespaceUri))
-    }
-
-  implicit def iteratorEncoder[A](implicit encoder: ElementEncoder[A]): ElementEncoder[Iterator[A]] =
-    new ElementEncoder[Iterator[A]] {
-      def encodeAsElement(as: Iterator[A],
+  given iteratorEncoder[A](using encoder: ElementEncoder[A]) as ElementEncoder[Iterator[A]] =
+    new ElementEncoder[Iterator[A]] with
+      def encodeAsElement(vs: Iterator[A],
                           sw: XMLStreamWriter2,
                           localName: String,
                           namespaceUri: Option[String]): Unit =
-        as.foreach(a => encoder.encodeAsElement(a, sw, localName, namespaceUri))
-    }
+        vs.foreach(a => encoder.encodeAsElement(a, sw, localName, namespaceUri))
 
-  implicit def seqEncoder[A](implicit encoder: ElementEncoder[A]): ElementEncoder[Seq[A]] =
+  given seqEncoder[A: ElementEncoder]: ElementEncoder[Seq[A]] =
     iteratorEncoder[A].contramap(_.iterator)
 
-  implicit def setEncoder[A](implicit encoder: ElementEncoder[A]): ElementEncoder[Set[A]] =
+  given setEncoder[A: ElementEncoder]: ElementEncoder[Set[A]] =
     iteratorEncoder[A].contramap(_.iterator)
 
-  implicit def listEncoder[A](implicit encoder: ElementEncoder[A]): ElementEncoder[List[A]] =
+  given listEncoder[A: ElementEncoder]: ElementEncoder[List[A]] =
     iteratorEncoder[A].contramap(_.iterator)
 
-  implicit def vectorEncoder[A](implicit encoder: ElementEncoder[A]): ElementEncoder[Vector[A]] =
+  given vectorEncoder[A: ElementEncoder]: ElementEncoder[Vector[A]] =
     iteratorEncoder[A].contramap(_.iterator)
 
-  implicit def chainEncoder[A](implicit encoder: ElementEncoder[A]): ElementEncoder[Chain[A]] =
+  given chainEncoder[A: ElementEncoder]: ElementEncoder[Chain[A]] =
     iteratorEncoder[A].contramap(_.iterator)
 
-  implicit def nonEmptyListEncoder[A](implicit encoder: ElementEncoder[A]): ElementEncoder[NonEmptyList[A]] =
+  given nonEmptyListEncoder[A: ElementEncoder]: ElementEncoder[NonEmptyList[A]] =
     listEncoder[A].contramap(_.toList)
 
-  implicit def nonEmptyVectorEncoder[A](implicit encoder: ElementEncoder[A]): ElementEncoder[NonEmptyVector[A]] =
+  given nonEmptyVectorEncoder[A: ElementEncoder]: ElementEncoder[NonEmptyVector[A]] =
     vectorEncoder[A].contramap(_.toVector)
 
-  implicit def nonEmptySetEncoder[A](implicit encoder: ElementEncoder[A]): ElementEncoder[NonEmptySet[A]] =
+  given nonEmptySetEncoder[A: ElementEncoder]: ElementEncoder[NonEmptySet[A]] =
     setEncoder[A].contramap(_.toSortedSet)
 
-  implicit def nonEmptyChainEncoder[A](implicit encoder: ElementEncoder[A]): ElementEncoder[NonEmptyChain[A]] =
+  given nonEmptyChainEncoder[A: ElementEncoder]: ElementEncoder[NonEmptyChain[A]] =
     chainEncoder[A].contramap(_.toChain)
 
-  implicit val localDateTimeEncoder: ElementEncoder[LocalDateTime] =
+  given localDateTimeEncoder: ElementEncoder[LocalDateTime] =
     stringEncoder.contramap(_.toString)
 
-  implicit val zonedDateTimeEncoder: ElementEncoder[ZonedDateTime] =
+  given zonedDateTimeEncoder: ElementEncoder[ZonedDateTime] =
     stringEncoder.contramap(_.toString)
 
-  implicit val localDateEncoder: ElementEncoder[LocalDate] =
+  given localDateEncoder: ElementEncoder[LocalDate] =
     stringEncoder.contramap(_.toString)
 
-  implicit val localTimeEncoder: ElementEncoder[LocalTime] =
+  given localTimeEncoder: ElementEncoder[LocalTime] =
     stringEncoder.contramap(_.toString)
-}
+end ElementEncoder

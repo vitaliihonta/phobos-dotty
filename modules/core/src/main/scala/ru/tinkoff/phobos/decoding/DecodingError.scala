@@ -1,14 +1,11 @@
 package ru.tinkoff.phobos.decoding
 
-case class DecodingError(text: String, history: List[String]) extends Exception {
-  override def getMessage: String = {
-    val trace = if (history.nonEmpty) {
+case class DecodingError(text: String, history: List[String]) extends Exception with
+  override def getMessage: String = 
+    val trace = if history.nonEmpty then
       history.mkString("\tIn element '", "'\n\t\tin element '", "'")
-    } else {
+    else 
       "\tIn root element"
-    }
     s"""Error while decoding XML: $text
        |$trace
      """.stripMargin
-  }
-}
