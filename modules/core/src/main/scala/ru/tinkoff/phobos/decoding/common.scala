@@ -1,8 +1,9 @@
 package ru.tinkoff.phobos.decoding
 
 import com.fasterxml.aalto.{AsyncByteArrayFeeder, AsyncXMLStreamReader}
-
 import scala.util.{Failure, Success, Try}
+import scala.deriving._
+import scala.compiletime._
 
 type XmlStreamReader = AsyncXMLStreamReader[AsyncByteArrayFeeder]
 
