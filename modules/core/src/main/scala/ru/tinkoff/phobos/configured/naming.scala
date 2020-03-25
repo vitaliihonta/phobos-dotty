@@ -1,6 +1,6 @@
 package ru.tinkoff.phobos.configured
 
-object naming with
+object naming:
   val camelCase: String => String = _.capitalize
 
   val snakeCase: String => String =

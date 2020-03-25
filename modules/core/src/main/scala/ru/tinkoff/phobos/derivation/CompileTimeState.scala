@@ -7,9 +7,9 @@ package ru.tinkoff.phobos.derivation
 import scala.collection.mutable
 import scala.quoted._
 
-private[derivation] object CompileTimeState with
+private[derivation] object CompileTimeState:
 
-  sealed abstract class TypePath(path: String) with
+  sealed abstract class TypePath(path: String):
     override def toString = path
   
   final case class CoproductType(typeName: String) extends TypePath(s"coproduct type $typeName")
@@ -20,7 +20,7 @@ private[derivation] object CompileTimeState with
   final case class ChainedImplicit(typeClassName: String, typeName: String)
     extends TypePath(s"chained implicit $typeClassName for type $typeName")
 
-  final class Stack with
+  final class Stack:
     private var frames = List.empty[Frame[_]]
     private val cache = mutable.Map.empty[Type[_], Expr[_]]
  
@@ -54,7 +54,7 @@ private[derivation] object CompileTimeState with
 
     final case class Frame[T](path: TypePath, searchType: Type[T], term: String)
 
-  object Stack with
+  object Stack:
     // Cheating to satisfy Singleton bound (which improves type inference).
     // private val dummyContext: blackbox.Context = null
     private val global = new Stack

@@ -1,4 +1,4 @@
-val dottyVersion = "0.22.0-RC1"
+val dottyVersion = "0.23.0-RC1"
 
 ThisBuild / name := "phobos"
 
@@ -20,6 +20,7 @@ def configuration(id: String)(project: Project): Project =
     commonDependencies,
     scalacOptions ++= List(
       "-language:experimental.macros",
+      "-language:implicitConversions",
       "-Yindent-colons"
     )
   )

@@ -19,30 +19,30 @@ import ru.tinkoff.phobos.decoding.instances.attribute.AttributeDecoderInstances
  *
  * To create new instance use .map or .emap method of existing instance.
  */
-trait AttributeDecoder[A] with
+trait AttributeDecoder[A]:
   self =>
   def decodeAsAttribute(c: Cursor, localName: String, namespaceUri: Option[String]): Either[DecodingError, A]
 
   def map[B](f: A => B): AttributeDecoder[B] =
-    new AttributeDecoder[B] with
+    new AttributeDecoder[B]:
       def decodeAsAttribute(c: Cursor, localName: String, namespaceUri: Option[String]): Either[DecodingError, B] =
         self.decodeAsAttribute(c, localName, namespaceUri).map(f)
 
   def emap[B](f: (List[String], A) => Either[DecodingError, B]): AttributeDecoder[B] =
-    new AttributeDecoder[B] with
+    new AttributeDecoder[B]:
       def decodeAsAttribute(c: Cursor, localName: String, namespaceUri: Option[String]): Either[DecodingError, B] =
         self.decodeAsAttribute(c, localName, namespaceUri) match
           case Right(a)    => f(c.history, a)
           case Left(error) => Left(error)
 end AttributeDecoder
 
-object AttributeDecoder extends AttributeDecoderInstances with
-  given attributeDecoderFunctor: Functor[AttributeDecoder] =
-    new Functor[AttributeDecoder] with
+object AttributeDecoder extends AttributeDecoderInstances:
+  given attributeDecoderFunctor as Functor[AttributeDecoder] =
+    new Functor[AttributeDecoder]:
       def map[A, B](fa: AttributeDecoder[A])(f: A => B): AttributeDecoder[B] = fa.map(f)
       
   private def decoderProduct[T](p: Mirror.ProductOf[T], elems: List[AttributeDecoder[_]]): AttributeDecoder[T] = 
-    new AttributeDecoder[T] with
+    new AttributeDecoder[T]:
       def decodeAsAttribute(cursor: Cursor, localName: String, namespaceUri: Option[String]): Either[DecodingError, T] =
         ???
   end decoderProduct

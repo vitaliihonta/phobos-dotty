@@ -15,8 +15,8 @@ import org.codehaus.stax2.{AttributeInfo, LocationInfo}
  * Cursor is a wrapper around XmlStreamReader providing
  * information about position in XML document.
  */
-class Cursor(private val sr: XmlStreamReader) with
-  export sr.{next => _, setFeature => _,  _}
+class Cursor(private val sr: XmlStreamReader):
+  export sr.{next => _, setFeature => _,  getFeature => _, _}
 
   private var historyStack: List[String] = Nil
 

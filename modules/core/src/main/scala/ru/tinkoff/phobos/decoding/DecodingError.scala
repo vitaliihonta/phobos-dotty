@@ -1,6 +1,6 @@
 package ru.tinkoff.phobos.decoding
 
-case class DecodingError(text: String, history: List[String]) extends Exception with
+case class DecodingError(text: String, history: List[String]) extends Exception:
   override def getMessage: String = 
     val trace = if history.nonEmpty then
       history.mkString("\tIn element '", "'\n\t\tin element '", "'")

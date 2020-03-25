@@ -4,7 +4,7 @@ import scala.annotation.StaticAnnotation
 /**
  * Syntax annotations for case class params. See ru.tinkoff.derivation.semiato docs for more explanation.
  */
-object syntax with
+object syntax:
 
   /**
    * Case class params with @attr annotation are treated as element attributes.

@@ -21,7 +21,7 @@ import ru.tinkoff.phobos.decoding.instances.element._
   * This typeclass describes process of decoding some element to an A value. Name of the element is
   * not defined in typeclass, it should be passed in decodeAsElement method.
   */
-trait ElementDecoder[A] with
+trait ElementDecoder[A]:
   self =>
   def decodeAsElement(c: Cursor, localName: String, namespaceUri: Option[String]): ElementDecoder[A]
   def result(history: List[String]): Either[DecodingError, A]
@@ -33,9 +33,9 @@ trait ElementDecoder[A] with
 
 end ElementDecoder
 
-object ElementDecoder extends ElementDecoderInstances with
-  given decoderFunctor: Functor[ElementDecoder] =
-    new Functor[ElementDecoder] with
+object ElementDecoder extends ElementDecoderInstances:
+  given decoderFunctor as Functor[ElementDecoder] =
+    new Functor[ElementDecoder]:
       def map[A, B](fa: ElementDecoder[A])(f: A => B): ElementDecoder[B] = fa.map(f)
 
 end ElementDecoder

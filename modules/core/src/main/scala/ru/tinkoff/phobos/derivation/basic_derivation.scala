@@ -12,7 +12,7 @@ final case class CaseClassParam[
 
 
 
-enum OneOfDecoders[T] with
+enum OneOfDecoders[T]:
   case Elem(decoder: ElementDecoder[T])
   case Attr(decoder: AttributeDecoder[T])
   case Text(decoder: TextDecoder[T])
@@ -41,4 +41,4 @@ inline def deriveProductDecoders[T <: Tuple] <: Tuple =
             case dec: TextDecoder[t] => OneOfDecoders.Text[t](dec)
           }
 
-      Param(derivedImplicit) *: deriveProductCodecs[tail]
+      Param(derivedImplicit) *: deriveProductDecoders[tail]

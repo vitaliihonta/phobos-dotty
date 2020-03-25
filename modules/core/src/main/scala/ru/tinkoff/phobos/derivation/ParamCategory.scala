@@ -1,4 +1,4 @@
 package ru.tinkoff.phobos.derivation
 
-enum ParamCategory with
+enum ParamCategory:
   case element, attribute, text

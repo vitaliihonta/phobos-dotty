@@ -18,7 +18,7 @@ import ru.tinkoff.phobos.Namespace
  *
  * This typeclass wraps ElementEncoder[A] and provides element name and StreamWriter.
  */
-trait XmlEncoder[A] with
+trait XmlEncoder[A]:
   val localname: String
   val namespaceuri: Option[String]
   val elementencoder: ElementEncoder[A]
@@ -40,26 +40,26 @@ trait XmlEncoder[A] with
   
 end XmlEncoder
 
-object XmlEncoder with
+object XmlEncoder:
 
   def apply[A](using instance: XmlEncoder[A]): XmlEncoder[A] = instance
 
   def fromElementEncoder[A](localName: String, namespaceUri: Option[String])(
       using elementEncoder: ElementEncoder[A]): XmlEncoder[A] =
-    new XmlEncoder[A] with
+    new XmlEncoder[A]:
       val localname: String                 = localName
       val namespaceuri: Option[String]      = namespaceUri
       val elementencoder: ElementEncoder[A] = elementEncoder
   end fromElementEncoder
 
-  def fromElementEncoder[A](localName: String)(implicit elementEncoder: ElementEncoder[A]): XmlEncoder[A] =
+  def fromElementEncoder[A](localName: String)(using elementEncoder: ElementEncoder[A]): XmlEncoder[A] =
     fromElementEncoder(localName, None)
 
-  def fromElementEncoderNs[A, NS](localName: String, namespaceInstance: NS)(implicit elementEncoder: ElementEncoder[A],
+  def fromElementEncoderNs[A, NS](localName: String, namespaceInstance: NS)(using elementEncoder: ElementEncoder[A],
                                                                             namespace: Namespace[NS]): XmlEncoder[A] =
     fromElementEncoder(localName, namespace.getNamespace.some)
 
-  def fromElementEncoderNs[A, NS](localName: String)(implicit elementEncoder: ElementEncoder[A],
+  def fromElementEncoderNs[A, NS](localName: String)(using elementEncoder: ElementEncoder[A],
                                                      namespace: Namespace[NS]): XmlEncoder[A] =
     fromElementEncoder(localName, namespace.getNamespace.some)
 end XmlEncoder

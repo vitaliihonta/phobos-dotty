@@ -19,7 +19,7 @@ import scala.annotation.tailrec
  *
  * To create new instance use .map or .emap method of existing instance.
  */
-trait TextDecoder[A] with 
+trait TextDecoder[A]: 
   self =>
   def decodeAsText(c: Cursor, localName: String, namespaceUri: Option[String]): TextDecoder[A]
   def result(history: List[String]): Either[DecodingError, A]
@@ -30,9 +30,9 @@ trait TextDecoder[A] with
   def emap[B](f: (List[String], A) => Either[DecodingError, B]): TextDecoder[B] = new EMappedDecoder(self, f)
 end TextDecoder
 
-object TextDecoder with
+object TextDecoder:
 
-  class MappedDecoder[A, B](fa: TextDecoder[A], f: A => B) extends TextDecoder[B] with
+  class MappedDecoder[A, B](fa: TextDecoder[A], f: A => B) extends TextDecoder[B]:
 
     def decodeAsText(c: Cursor, localName: String, namespaceUri: Option[String]): TextDecoder[B] =
       MappedDecoder[A, B](fa.decodeAsText(c, localName, namespaceUri), f)
@@ -45,7 +45,7 @@ object TextDecoder with
   end MappedDecoder
 
   final class EMappedDecoder[A, B](fa: TextDecoder[A], f: (List[String], A) => Either[DecodingError, B])
-      extends TextDecoder[B] with
+      extends TextDecoder[B]:
 
     def decodeAsText(c: Cursor, localName: String, namespaceUri: Option[String]): TextDecoder[B] =
       EMappedDecoder(fa.decodeAsText(c, localName, namespaceUri), f)
@@ -57,11 +57,11 @@ object TextDecoder with
     def isCompleted: Boolean = fa.isCompleted
   end EMappedDecoder
 
-  given decoderFunctor: Functor[TextDecoder] =
-    new Functor[TextDecoder] with
+  given decoderFunctor as Functor[TextDecoder] =
+    new Functor[TextDecoder]:
       def map[A, B](fa: TextDecoder[A])(f: A => B): TextDecoder[B] = fa.map(f)
 
-  final class ConstDecoder[A](a: A) extends TextDecoder[A] with
+  final class ConstDecoder[A](a: A) extends TextDecoder[A]:
     def decodeAsText(c: Cursor, localName: String, namespaceUri: Option[String]): TextDecoder[A] = this
 
     def result(history: List[String]): Either[DecodingError, A] = Right(a)
@@ -71,7 +71,7 @@ object TextDecoder with
     override def toString: String = s"ConstDecoder($a)"
   end ConstDecoder
 
-  final class FailedDecoder[A](decodingError: DecodingError) extends TextDecoder[A] with
+  final class FailedDecoder[A](decodingError: DecodingError) extends TextDecoder[A]:
     def decodeAsText(c: Cursor, localName: String, namespaceUri: Option[String]): TextDecoder[A] = this
 
     def result(history: List[String]): Either[DecodingError, A] = Left(decodingError)
@@ -84,9 +84,9 @@ object TextDecoder with
   /**
     * Instances
     */
-  class StringDecoder(string: String = "") extends TextDecoder[String] with
+  class StringDecoder(string: String = "") extends TextDecoder[String]:
     def decodeAsText(c: Cursor, localName: String, namespaceUri: Option[String]): TextDecoder[String] = 
-      val stringBuilder = new StringBuilder(string)
+      val stringBuilder = StringBuilder(string)
       @tailrec
       def go(): TextDecoder[String] = 
         if c.isCharacters() || c.getEventType() == XMLStreamConstants.CDATA then
@@ -117,11 +117,11 @@ object TextDecoder with
     override def toString: String = s"StringDecoder($string)"
   end StringDecoder
 
-  given stringDecoder: TextDecoder[String] = StringDecoder()
+  given stringDecoder as TextDecoder[String] = StringDecoder()
 
-  given unitDecoder: TextDecoder[Unit] = ConstDecoder[Unit](())
+  given unitDecoder as TextDecoder[Unit] = ConstDecoder[Unit](())
 
-  given booleanDecoder: TextDecoder[Boolean] =
+  given booleanDecoder as TextDecoder[Boolean] =
     stringDecoder.emap:
       (history, string) =>
         string match
@@ -129,9 +129,9 @@ object TextDecoder with
           case "false" | "0" => Right(false)
           case str           => Left(DecodingError(s"Value `$str` is not `true` or `false`", history))
 
-  given javaBooleanDecoder: TextDecoder[java.lang.Boolean] = booleanDecoder.map(_.booleanValue())
+  given javaBooleanDecoder as TextDecoder[java.lang.Boolean] = booleanDecoder.map(_.booleanValue())
 
-  given charDecoder: TextDecoder[Char] =
+  given charDecoder as TextDecoder[Char] =
     stringDecoder.emap: 
       (history, string) =>
         if string.length != 1 then
@@ -139,39 +139,39 @@ object TextDecoder with
         else
           Right(string.head)
 
-  given javaCharacterDecoder: TextDecoder[java.lang.Character] = charDecoder.map(_.charValue())
-  given floatDecoder: TextDecoder[Float]                       = stringDecoder.emap(wrapException(_.toFloat))
-  given javaFloatDecoder: TextDecoder[java.lang.Float]         = floatDecoder.map(_.floatValue())
-  given doubleDecoder: TextDecoder[Double]                     = stringDecoder.emap(wrapException(_.toDouble))
-  given javaDoubleDecoder: TextDecoder[java.lang.Double]       = doubleDecoder.map(_.doubleValue())
-  given byteDecoder: TextDecoder[Byte]                         = stringDecoder.emap(wrapException(_.toByte))
-  given javaByteDecoder: TextDecoder[java.lang.Byte]           = byteDecoder.map(_.byteValue())
-  given shortDecoder: TextDecoder[Short]                       = stringDecoder.emap(wrapException(_.toShort))
-  given javaShortDecoder: TextDecoder[java.lang.Short]         = shortDecoder.map(_.shortValue())
-  given intDecoder: TextDecoder[Int]                           = stringDecoder.emap(wrapException(_.toInt))
-  given javaIntegerDecoder: TextDecoder[java.lang.Integer]     = intDecoder.map(_.intValue())
-  given longDecoder: TextDecoder[Long]                         = stringDecoder.emap(wrapException(_.toLong))
-  given javaLongDecoder: TextDecoder[java.lang.Long]           = longDecoder.map(_.longValue())
-  given bigIntDecoder: TextDecoder[BigInt]                     = stringDecoder.emap(wrapException(BigInt.apply))
+  given javaCharacterDecoder as TextDecoder[java.lang.Character] = charDecoder.map(_.charValue())
+  given floatDecoder as TextDecoder[Float]                       = stringDecoder.emap(wrapException(_.toFloat))
+  given javaFloatDecoder as TextDecoder[java.lang.Float]         = floatDecoder.map(_.floatValue())
+  given doubleDecoder as TextDecoder[Double]                     = stringDecoder.emap(wrapException(_.toDouble))
+  given javaDoubleDecoder as TextDecoder[java.lang.Double]       = doubleDecoder.map(_.doubleValue())
+  given byteDecoder as TextDecoder[Byte]                         = stringDecoder.emap(wrapException(_.toByte))
+  given javaByteDecoder as TextDecoder[java.lang.Byte]           = byteDecoder.map(_.byteValue())
+  given shortDecoder as TextDecoder[Short]                       = stringDecoder.emap(wrapException(_.toShort))
+  given javaShortDecoder as TextDecoder[java.lang.Short]         = shortDecoder.map(_.shortValue())
+  given intDecoder as TextDecoder[Int]                           = stringDecoder.emap(wrapException(_.toInt))
+  given javaIntegerDecoder as TextDecoder[java.lang.Integer]     = intDecoder.map(_.intValue())
+  given longDecoder as TextDecoder[Long]                         = stringDecoder.emap(wrapException(_.toLong))
+  given javaLongDecoder as TextDecoder[java.lang.Long]           = longDecoder.map(_.longValue())
+  given bigIntDecoder as TextDecoder[BigInt]                     = stringDecoder.emap(wrapException(BigInt.apply))
 
-  given javaBigIntegerDecoder: TextDecoder[java.math.BigInteger] =
+  given javaBigIntegerDecoder as TextDecoder[java.math.BigInteger] =
     stringDecoder.emap(wrapException(str => java.math.BigInteger(str)))
 
-  given bigDecimalDecoder: TextDecoder[BigDecimal]               = stringDecoder.map(BigDecimal.apply)
-  given javaBigDecimalDecoder: TextDecoder[java.math.BigDecimal] = bigDecimalDecoder.map(_.bigDecimal)
-  given UUIDDecoder: TextDecoder[UUID]                           = stringDecoder.emap(wrapException(UUID.fromString))
+  given bigDecimalDecoder as TextDecoder[BigDecimal]               = stringDecoder.map(BigDecimal.apply)
+  given javaBigDecimalDecoder as TextDecoder[java.math.BigDecimal] = bigDecimalDecoder.map(_.bigDecimal)
+  given UUIDDecoder as TextDecoder[UUID]                           = stringDecoder.emap(wrapException(UUID.fromString))
 
-  given base64Decoder: TextDecoder[Array[Byte]] = stringDecoder.emap(wrapException(Base64.getDecoder.decode))
+  given base64Decoder as TextDecoder[Array[Byte]] = stringDecoder.emap(wrapException(Base64.getDecoder.decode))
 
-  given localDateTimeDecoder: TextDecoder[LocalDateTime] =
+  given localDateTimeDecoder as TextDecoder[LocalDateTime] =
     stringDecoder.emap(wrapException(LocalDateTime.parse))
 
-  given zonedDateTimeDecoder: TextDecoder[ZonedDateTime] =
+  given zonedDateTimeDecoder as TextDecoder[ZonedDateTime] =
     stringDecoder.emap(wrapException(ZonedDateTime.parse))
 
-  given localDateDecoder: TextDecoder[LocalDate] =
+  given localDateDecoder as TextDecoder[LocalDate] =
     stringDecoder.emap(wrapException(LocalDate.parse))
 
-  given localTimeDecoder: TextDecoder[LocalTime] =
+  given localTimeDecoder as TextDecoder[LocalTime] =
     stringDecoder.emap(wrapException(LocalTime.parse))
 end TextDecoder

@@ -20,7 +20,7 @@ import ru.tinkoff.phobos.decoding.XmlDecoder.createStreamReader
  *
  * This typeclass wraps ElementDecoder[A] and provides element name and Cursor.
  */
-trait XmlDecoder[A] with
+trait XmlDecoder[A]:
   val localname: String
   val namespaceuri: Option[String]
   val elementdecoder: ElementDecoder[A]
@@ -65,7 +65,7 @@ trait XmlDecoder[A] with
   
 end XmlDecoder
 
-object XmlDecoder with
+object XmlDecoder:
 
   def createStreamReader(charset: String): XmlStreamReader = 
     val inputFactory = new InputFactoryImpl
@@ -75,23 +75,23 @@ object XmlDecoder with
     AsyncStreamReaderImpl[AsyncByteArrayFeeder](AsyncByteArrayScanner(cfg))
   
 
-  def apply[A](given instance: XmlDecoder[A]): XmlDecoder[A] = instance
+  def apply[A](using instance: XmlDecoder[A]): XmlDecoder[A] = instance
 
   def fromElementDecoder[A](localName: String, namespaceUri: Option[String])(
-      given elementDecoder: ElementDecoder[A]): XmlDecoder[A] =
-    new XmlDecoder[A] with
+    using elementDecoder: ElementDecoder[A]): XmlDecoder[A] =
+    new XmlDecoder[A]:
       val localname: String = localName
       val namespaceuri: Option[String] = namespaceUri
       val elementdecoder: ElementDecoder[A] = elementDecoder
 
-  def fromElementDecoder[A](localName: String)(given elementDecoder: ElementDecoder[A]): XmlDecoder[A] =
+  def fromElementDecoder[A](localName: String)(using elementDecoder: ElementDecoder[A]): XmlDecoder[A] =
     fromElementDecoder(localName, None)
 
-  def fromElementDecoderNs[A, NS](localName: String, namespaceInstance: NS)(given elementDecoder: ElementDecoder[A],
+  def fromElementDecoderNs[A, NS](localName: String, namespaceInstance: NS)(using elementDecoder: ElementDecoder[A],
                                                                             namespace: Namespace[NS]): XmlDecoder[A] =
     fromElementDecoder(localName, namespace.getNamespace.some)
 
-  def fromElementDecoderNs[A, NS](localName: String)(given elementDecoder: ElementDecoder[A],
+  def fromElementDecoderNs[A, NS](localName: String)(using elementDecoder: ElementDecoder[A],
                                                      namespace: Namespace[NS]): XmlDecoder[A] =
     fromElementDecoder(localName, namespace.getNamespace.some)
 
