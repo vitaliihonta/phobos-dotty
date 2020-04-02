@@ -163,7 +163,7 @@ object ElementEncoder:
         val p = param.paramType.asInstanceOf[tasty.TypeOrBounds]
         val attributeEncoder = AppliedType(attrType, List(p))
         val encoder = searchImplicit(attributeEncoder) match
-          case i@Ident(_) => i
+          case t: Term => t
         Apply(
           encoder.select(encodeAsAttributeSym),
           List[Term](
@@ -178,7 +178,7 @@ object ElementEncoder:
         val p = param.paramType.asInstanceOf[tasty.TypeOrBounds]
         val textEncoder = AppliedType(textType, List(p))
         val encoder = searchImplicit(textEncoder) match
-          case i@Ident(_) => i
+          case t: Term => t
         Apply(
           encoder.select(encodeAsTextSym),
           List[Term](
@@ -192,7 +192,7 @@ object ElementEncoder:
         val p = param.paramType.asInstanceOf[tasty.TypeOrBounds]
         val elementEncoder = AppliedType(elementType, List(p))
         val encoder = searchImplicit(elementEncoder) match
-          case i@Ident(_) => i
+          case t: Term => t
         Apply(
           encoder.select(encodeAsElementSym),
           List[Term](
@@ -223,7 +223,7 @@ object ElementEncoder:
             ${expr('a, 'sw)}
             sw.writeEndElement()
       }
-      println(x.show)
+      // println(x.show)
       x
   end deriveImpl
 

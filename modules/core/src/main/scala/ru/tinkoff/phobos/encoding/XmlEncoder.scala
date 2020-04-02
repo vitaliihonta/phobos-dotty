@@ -20,10 +20,10 @@ trait XmlEncoder[A]:
   val localname: String
   val elementencoder: ElementEncoder[A]
 
-  def encode(a: A, charset: String = "UTF-8"): String =
-    String(encodeToBytes(a, charset), charset)
+  def (a: A).encode(charset: String = "UTF-8"): String =
+    String(a.encodeToBytes(charset), charset)
 
-  def encodeToBytes(a: A, charset: String = "UTF-8"): Array[Byte] = 
+  def (a: A).encodeToBytes(charset: String = "UTF-8"): Array[Byte] = 
     val os      = new ByteArrayOutputStream
     val factory = new OutputFactoryImpl
     factory.setProperty("javax.xml.stream.isRepairingNamespaces", true)
@@ -41,18 +41,15 @@ object XmlEncoder:
 
   def apply[A](using instance: XmlEncoder[A]): XmlEncoder[A] = instance
 
-  def fromElementEncoder[A](localName: String)(
-      using elementEncoder: ElementEncoder[A]): XmlEncoder[A] =
-    new XmlEncoder[A]:
-      val localname: String                 = localName
-      val elementencoder: ElementEncoder[A] = elementEncoder
-  end fromElementEncoder
-
-  inline given derived[A](using encoder: ElementEncoder[A]) as XmlEncoder[A] = ${derivedImpl[A]('encoder)}
-
   import scala.quoted._
-  def derivedImpl[A](encoder: Expr[ElementEncoder[A]])(using q: QuoteContext, A: Type[A]): Expr[XmlEncoder[A]] = 
+  import ru.tinkoff.phobos.derivation.raiseError
+  
+  inline given derived[A] as XmlEncoder[A] = 
+    ${ derivedImpl[A] }
+
+  def derivedImpl[A](using q: QuoteContext, A: Type[A]): Expr[XmlEncoder[A]] = 
     val a = Expr(A.show)
+    val encoder = Expr.summon[ElementEncoder[A]] getOrElse raiseError(s"XmlEncoder requires ElementEncoder for ${A.show}")
     '{
       new XmlEncoder[$A]:
         override val localname: String                  = ${a}

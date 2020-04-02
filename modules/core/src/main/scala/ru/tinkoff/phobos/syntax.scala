@@ -1,6 +1,6 @@
 package ru.tinkoff.phobos
 import scala.annotation.StaticAnnotation
-
+import ru.tinkoff.phobos.configured.ElementCodecConfig
 /**
  * Syntax annotations for case class params. See ru.tinkoff.derivation.semiato docs for more explanation.
  */
@@ -20,3 +20,6 @@ object syntax:
    * Allows to rename xml tag or attribute name while encoding and decoding
    */
   final class renamed(to: String) extends StaticAnnotation
+
+
+  final class configured(config: ElementCodecConfig) extends StaticAnnotation

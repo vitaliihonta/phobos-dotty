@@ -6,6 +6,7 @@ import scala.quoted.{given _, _}
 import scala.quoted.show._
 import scala.tasty.reflect._
 import ru.tinkoff.phobos.syntax
+import ru.tinkoff.phobos.configured.ElementCodecConfig
 
 object FetchGroup {
   def fetchProduct[T: Type](using ops: QuotedOps): List[ops.CaseClassParam] = 
@@ -16,6 +17,7 @@ object FetchGroup {
     val attrType = typeOf[syntax.attr]
     val textType = typeOf[syntax.text]
     val renamedType = typeOf[syntax.renamed]
+    val configuredType = typeOf[ElementCodecConfig]
     
     if classSym.caseFields.isEmpty then 
       raiseError(s"$t shoud be a case class with fields")
