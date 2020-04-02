@@ -7,8 +7,8 @@ ThisBuild / scalaVersion := dottyVersion
 
 lazy val commonDependencies =
   libraryDependencies ++= List(
-    ("org.typelevel" %% "cats-core" % "2.0.0").withDottyCompat(dottyVersion),
-    "com.fasterxml" % "aalto-xml" % "1.2.1",
+    ("org.typelevel" %% "cats-core" % "2.1.1").withDottyCompat(dottyVersion),
+    "com.fasterxml" % "aalto-xml" % "1.2.2",
     ("org.scalactic" %% "scalactic" % "3.0.8" % "test").withDottyCompat(dottyVersion),
     ("org.scalatest" %% "scalatest" % "3.0.8" % "test").withDottyCompat(dottyVersion),
   )

@@ -62,4 +62,11 @@ object XmlEncoder:
   def fromElementEncoderNs[A, NS](localName: String)(using elementEncoder: ElementEncoder[A],
                                                      namespace: Namespace[NS]): XmlEncoder[A] =
     fromElementEncoder(localName, namespace.getNamespace.some)
+
+  inline given derived[A] as XmlEncoder[A] =
+    given elemEncoder as ElementEncoder[A] = new ElementEncoder[A]:
+      override def encodeAsElement(a: A, sw: XMLStreamWriter2, localName: String, namespaceUri: Option[String]): Unit = 
+        println(ru.tinkoff.phobos.derivation.FetchGroup.get[A])
+    XmlEncoder.fromElementEncoder[A]("localName")
+  end derived
 end XmlEncoder
