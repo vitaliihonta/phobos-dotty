@@ -19,12 +19,12 @@ import org.codehaus.stax2.XMLStreamWriter2
  */
 trait AttributeEncoder[A]: 
   self =>
-  def encodeAsAttribute(a: A, sw: XMLStreamWriter2, localName: String, namespaceUri: Option[String]): Unit
+  def encodeAsAttribute(a: A, sw: PhobosStreamWriter, localName: String): Unit
 
   def contramap[B](f: B => A): AttributeEncoder[B] =
     new AttributeEncoder[B]:
-      def encodeAsAttribute(b: B, sw: XMLStreamWriter2, localName: String, namespaceUri: Option[String]): Unit =
-        self.encodeAsAttribute(f(b), sw, localName, namespaceUri)
+      def encodeAsAttribute(b: B, sw: PhobosStreamWriter, localName: String): Unit =
+        self.encodeAsAttribute(f(b), sw, localName)
 
 end AttributeEncoder
 
@@ -38,12 +38,12 @@ object AttributeEncoder:
     */
   given stringEncoder as AttributeEncoder[String] =
     new AttributeEncoder[String]:
-      def encodeAsAttribute(a: String, sw: XMLStreamWriter2, localName: String, namespaceUri: Option[String]): Unit =
-        namespaceUri.fold(sw.writeAttribute(localName, a))(ns => sw.writeAttribute(ns, localName, a))
+      def encodeAsAttribute(a: String, sw: PhobosStreamWriter, localName: String): Unit =
+        sw.writeAttribute(localName, a)
 
   given unitEncoder as AttributeEncoder[Unit] =
     new AttributeEncoder[Unit]:
-      def encodeAsAttribute(a: Unit, sw: XMLStreamWriter2, localName: String, namespaceUri: Option[String]): Unit = ()
+      def encodeAsAttribute(a: Unit, sw: PhobosStreamWriter, localName: String): Unit = ()
 
   given booleanEncoder as AttributeEncoder[Boolean]                     = stringEncoder.contramap(_.toString)
   given javaBooleanEncoder as AttributeEncoder[java.lang.Boolean]       = booleanEncoder.contramap(_.booleanValue())
@@ -72,8 +72,8 @@ object AttributeEncoder:
 
   given optionEncoder[A](using encoder: AttributeEncoder[A]) as AttributeEncoder[Option[A]] =
     new AttributeEncoder[Option[A]]:
-      def encodeAsAttribute(a: Option[A], sw: XMLStreamWriter2, localName: String, namespaceUri: Option[String]): Unit =
-        a.foreach(encoder.encodeAsAttribute(_, sw, localName, namespaceUri))
+      def encodeAsAttribute(a: Option[A], sw: PhobosStreamWriter, localName: String): Unit =
+        a.foreach(encoder.encodeAsAttribute(_, sw, localName))
 
   given localDateTimeEncoder as AttributeEncoder[LocalDateTime] =
     stringEncoder.contramap(_.toString)

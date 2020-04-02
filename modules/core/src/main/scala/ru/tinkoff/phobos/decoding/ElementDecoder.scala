@@ -23,7 +23,7 @@ import ru.tinkoff.phobos.decoding.instances.element._
   */
 trait ElementDecoder[A]:
   self =>
-  def decodeAsElement(c: Cursor, localName: String, namespaceUri: Option[String]): ElementDecoder[A]
+  def decodeAsElement(c: Cursor, localName: String): ElementDecoder[A]
   def result(history: List[String]): Either[DecodingError, A]
   def isCompleted: Boolean
 

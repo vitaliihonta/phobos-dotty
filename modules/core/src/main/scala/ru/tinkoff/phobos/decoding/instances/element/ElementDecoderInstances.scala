@@ -55,14 +55,14 @@ trait ElementDecoderInstances:
 
   given optionDecoder[A](using decoder: ElementDecoder[A]) as ElementDecoder[Option[A]] =
     new ElementDecoder[Option[A]]:
-      def decodeAsElement(c: Cursor, localName: String, namespaceUri: Option[String]): ElementDecoder[Option[A]] =
+      def decodeAsElement(c: Cursor, localName: String): ElementDecoder[Option[A]] =
         if c.isStartElement() then
-          errorIfWrongName[Option[A]](c, localName, namespaceUri).getOrElse:
+          errorIfWrongName[Option[A]](c, localName).getOrElse:
             if isNil(c) || c.isEmptyElement() then
               c.next()
               ConstDecoder(None)
             else
-              decoder.map[Option[A]](a => Some(a)).decodeAsElement(c, localName, namespaceUri)
+              decoder.map[Option[A]](a => Some(a)).decodeAsElement(c, localName)
         else 
           FailedDecoder[Option[A]](c.error(s"Unexpected event: '${c.getEventType()}'"))
         

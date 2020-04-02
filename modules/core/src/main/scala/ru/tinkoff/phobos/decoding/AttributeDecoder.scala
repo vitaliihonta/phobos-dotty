@@ -3,8 +3,6 @@ package ru.tinkoff.phobos.decoding
 import java.time.{LocalDate, LocalDateTime, LocalTime, ZonedDateTime}
 import java.util.{Base64, UUID}
 import cats.Functor
-import scala.deriving._
-import scala.compiletime._
 import com.fasterxml.aalto._
 import ru.tinkoff.phobos.decoding.instances.attribute.AttributeDecoderInstances
 
@@ -21,17 +19,17 @@ import ru.tinkoff.phobos.decoding.instances.attribute.AttributeDecoderInstances
  */
 trait AttributeDecoder[A]:
   self =>
-  def decodeAsAttribute(c: Cursor, localName: String, namespaceUri: Option[String]): Either[DecodingError, A]
+  def decodeAsAttribute(c: Cursor, localName: String): Either[DecodingError, A]
 
   def map[B](f: A => B): AttributeDecoder[B] =
     new AttributeDecoder[B]:
-      def decodeAsAttribute(c: Cursor, localName: String, namespaceUri: Option[String]): Either[DecodingError, B] =
-        self.decodeAsAttribute(c, localName, namespaceUri).map(f)
+      def decodeAsAttribute(c: Cursor, localName: String): Either[DecodingError, B] =
+        self.decodeAsAttribute(c, localName).map(f)
 
   def emap[B](f: (List[String], A) => Either[DecodingError, B]): AttributeDecoder[B] =
     new AttributeDecoder[B]:
-      def decodeAsAttribute(c: Cursor, localName: String, namespaceUri: Option[String]): Either[DecodingError, B] =
-        self.decodeAsAttribute(c, localName, namespaceUri) match
+      def decodeAsAttribute(c: Cursor, localName: String): Either[DecodingError, B] =
+        self.decodeAsAttribute(c, localName) match
           case Right(a)    => f(c.history, a)
           case Left(error) => Left(error)
 end AttributeDecoder
@@ -40,26 +38,5 @@ object AttributeDecoder extends AttributeDecoderInstances:
   given attributeDecoderFunctor as Functor[AttributeDecoder] =
     new Functor[AttributeDecoder]:
       def map[A, B](fa: AttributeDecoder[A])(f: A => B): AttributeDecoder[B] = fa.map(f)
-      
-  private def decoderProduct[T](p: Mirror.ProductOf[T], elems: List[AttributeDecoder[_]]): AttributeDecoder[T] = 
-    new AttributeDecoder[T]:
-      def decodeAsAttribute(cursor: Cursor, localName: String, namespaceUri: Option[String]): Either[DecodingError, T] =
-        ???
-  end decoderProduct
-
-  private inline def summonSingle[T]: T = summonFrom {
-    case t: T => t
-  }
-
-  private inline def summonAll[T <: Tuple]: List[AttributeDecoder[_]] = inline erasedValue[T] match
-    case _: Unit => Nil
-    case _: (t *: ts) => summonSingle[AttributeDecoder[t]] :: summonAll[ts]
-
-  inline given derived[T](using m: Mirror.Of[T]) as AttributeDecoder[T] =
-    val instances = summonAll[m.MirroredElemLabels]
-    inline m match 
-      case p: Mirror.ProductOf[T] => decoderProduct(p, instances)
-      case s: Mirror.SumOf[T] => error("Deriving sealed traits currently not supported")
-  end derived
 
 end AttributeDecoder

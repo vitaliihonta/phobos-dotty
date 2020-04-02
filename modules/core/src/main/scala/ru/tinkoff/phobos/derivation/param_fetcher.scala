@@ -49,7 +49,6 @@ object FetchGroup {
           ops.CaseClassParam(
             localName = field.name,
             xmlName = fetchXmlName(field),
-            namespaceUri = "ns",
             paramType = tpe,
             category = fetchGroup(field)
           )

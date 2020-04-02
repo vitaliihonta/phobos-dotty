@@ -6,7 +6,6 @@ import cats.syntax.option._
 import com.fasterxml.aalto.AsyncByteArrayFeeder
 import com.fasterxml.aalto.async.{AsyncByteArrayScanner, AsyncStreamReaderImpl}
 import com.fasterxml.aalto.stax.InputFactoryImpl
-import ru.tinkoff.phobos.Namespace
 import ru.tinkoff.phobos.decoding.XmlDecoder.createStreamReader
 
 /**
@@ -22,7 +21,6 @@ import ru.tinkoff.phobos.decoding.XmlDecoder.createStreamReader
  */
 trait XmlDecoder[A]:
   val localname: String
-  val namespaceuri: Option[String]
   val elementdecoder: ElementDecoder[A]
 
   def decode(string: String, charset: String = "UTF-8"): Either[DecodingError, A] =
@@ -40,7 +38,7 @@ trait XmlDecoder[A]:
     } do ()
 
     elementdecoder
-      .decodeAsElement(cursor, localname, namespaceuri)
+      .decodeAsElement(cursor, localname)
       .result(cursor.history)
   
 
@@ -59,7 +57,7 @@ trait XmlDecoder[A]:
         if decoder.result(cursor.history).isRight then
           decoder
         else
-          decoder.decodeAsElement(cursor, localname, namespaceuri)
+          decoder.decodeAsElement(cursor, localname)
     sr.getInputFeeder.endOfInput()
     a.result(cursor.history)
   
@@ -77,22 +75,10 @@ object XmlDecoder:
 
   def apply[A](using instance: XmlDecoder[A]): XmlDecoder[A] = instance
 
-  def fromElementDecoder[A](localName: String, namespaceUri: Option[String])(
+  def fromElementDecoder[A](localName: String)(
     using elementDecoder: ElementDecoder[A]): XmlDecoder[A] =
     new XmlDecoder[A]:
       val localname: String = localName
-      val namespaceuri: Option[String] = namespaceUri
       val elementdecoder: ElementDecoder[A] = elementDecoder
-
-  def fromElementDecoder[A](localName: String)(using elementDecoder: ElementDecoder[A]): XmlDecoder[A] =
-    fromElementDecoder(localName, None)
-
-  def fromElementDecoderNs[A, NS](localName: String, namespaceInstance: NS)(using elementDecoder: ElementDecoder[A],
-                                                                            namespace: Namespace[NS]): XmlDecoder[A] =
-    fromElementDecoder(localName, namespace.getNamespace.some)
-
-  def fromElementDecoderNs[A, NS](localName: String)(using elementDecoder: ElementDecoder[A],
-                                                     namespace: Namespace[NS]): XmlDecoder[A] =
-    fromElementDecoder(localName, namespace.getNamespace.some)
 
 end XmlDecoder

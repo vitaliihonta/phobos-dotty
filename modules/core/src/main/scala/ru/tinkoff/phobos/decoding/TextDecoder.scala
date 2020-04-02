@@ -21,7 +21,7 @@ import scala.annotation.tailrec
  */
 trait TextDecoder[A]: 
   self =>
-  def decodeAsText(c: Cursor, localName: String, namespaceUri: Option[String]): TextDecoder[A]
+  def decodeAsText(c: Cursor, localName: String): TextDecoder[A]
   def result(history: List[String]): Either[DecodingError, A]
   def isCompleted: Boolean
 
@@ -34,8 +34,8 @@ object TextDecoder:
 
   class MappedDecoder[A, B](fa: TextDecoder[A], f: A => B) extends TextDecoder[B]:
 
-    def decodeAsText(c: Cursor, localName: String, namespaceUri: Option[String]): TextDecoder[B] =
-      MappedDecoder[A, B](fa.decodeAsText(c, localName, namespaceUri), f)
+    def decodeAsText(c: Cursor, localName: String): TextDecoder[B] =
+      MappedDecoder[A, B](fa.decodeAsText(c, localName), f)
 
     def result(history: List[String]): Either[DecodingError, B] = fa.result(history).map(f)
 
@@ -47,8 +47,8 @@ object TextDecoder:
   final class EMappedDecoder[A, B](fa: TextDecoder[A], f: (List[String], A) => Either[DecodingError, B])
       extends TextDecoder[B]:
 
-    def decodeAsText(c: Cursor, localName: String, namespaceUri: Option[String]): TextDecoder[B] =
-      EMappedDecoder(fa.decodeAsText(c, localName, namespaceUri), f)
+    def decodeAsText(c: Cursor, localName: String): TextDecoder[B] =
+      EMappedDecoder(fa.decodeAsText(c, localName), f)
 
     def result(history: List[String]): Either[DecodingError, B] = fa.result(history) match
       case Right(a)    => f(history, a)
@@ -62,7 +62,7 @@ object TextDecoder:
       def map[A, B](fa: TextDecoder[A])(f: A => B): TextDecoder[B] = fa.map(f)
 
   final class ConstDecoder[A](a: A) extends TextDecoder[A]:
-    def decodeAsText(c: Cursor, localName: String, namespaceUri: Option[String]): TextDecoder[A] = this
+    def decodeAsText(c: Cursor, localName: String): TextDecoder[A] = this
 
     def result(history: List[String]): Either[DecodingError, A] = Right(a)
 
@@ -72,7 +72,7 @@ object TextDecoder:
   end ConstDecoder
 
   final class FailedDecoder[A](decodingError: DecodingError) extends TextDecoder[A]:
-    def decodeAsText(c: Cursor, localName: String, namespaceUri: Option[String]): TextDecoder[A] = this
+    def decodeAsText(c: Cursor, localName: String): TextDecoder[A] = this
 
     def result(history: List[String]): Either[DecodingError, A] = Left(decodingError)
 
@@ -85,7 +85,7 @@ object TextDecoder:
     * Instances
     */
   class StringDecoder(string: String = "") extends TextDecoder[String]:
-    def decodeAsText(c: Cursor, localName: String, namespaceUri: Option[String]): TextDecoder[String] = 
+    def decodeAsText(c: Cursor, localName: String): TextDecoder[String] = 
       val stringBuilder = StringBuilder(string)
       @tailrec
       def go(): TextDecoder[String] = 

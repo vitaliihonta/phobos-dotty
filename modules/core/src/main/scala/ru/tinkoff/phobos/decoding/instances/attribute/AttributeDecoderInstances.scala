@@ -12,9 +12,8 @@ trait AttributeDecoderInstances:
     given stringDecoder as AttributeDecoder[String] =
       new AttributeDecoder[String]:
         def decodeAsAttribute(c: Cursor,
-                              localName: String,
-                              namespaceUri: Option[String]): Either[DecodingError, String] =
-          val idx = c.getAttributeIndex(namespaceUri.orNull, localName)
+                              localName: String): Either[DecodingError, String] =
+          val idx = c.getAttributeIndex(null, localName)
           if idx > -1 then
             Right(c.getAttributeValue(idx))
           else
@@ -22,7 +21,7 @@ trait AttributeDecoderInstances:
     end stringDecoder
   
     given unitDecoder as AttributeDecoder[Unit] = new AttributeDecoder[Unit]:
-      def decodeAsAttribute(c: Cursor, localName: String, namespaceUri: Option[String]): Either[DecodingError, Unit] =
+      def decodeAsAttribute(c: Cursor, localName: String): Either[DecodingError, Unit] =
         Right(())
   
     given booleanDecoder as AttributeDecoder[Boolean] =
@@ -71,11 +70,10 @@ trait AttributeDecoderInstances:
     given optionDecoder[A](using decoder: AttributeDecoder[A]) as AttributeDecoder[Option[A]] =
       new AttributeDecoder[Option[A]]:
         def decodeAsAttribute(c: Cursor,
-                              localName: String,
-                              namespaceUri: Option[String]): Either[DecodingError, Option[A]] =
-          val idx = c.getAttributeIndex(namespaceUri.orNull, localName)
+                              localName: String): Either[DecodingError, Option[A]] =
+          val idx = c.getAttributeIndex(null, localName)
           if idx > -1 then
-            decoder.decodeAsAttribute(c, localName, namespaceUri).map(Some.apply)
+            decoder.decodeAsAttribute(c, localName).map(Some.apply)
           else
             Right(None)
     end optionDecoder

@@ -12,7 +12,7 @@ import scala.collection.mutable.ListBuffer
   * Instances
   */
 final class StringDecoder(string: String = "") extends ElementDecoder[String]:
-  def decodeAsElement(c: Cursor, localName: String, namespaceUri: Option[String]): ElementDecoder[String] = 
+  def decodeAsElement(c: Cursor, localName: String): ElementDecoder[String] = 
     val stringBuilder = new StringBuilder(string)
 
     @tailrec
@@ -22,7 +22,7 @@ final class StringDecoder(string: String = "") extends ElementDecoder[String]:
         c.next()
         go()
       else if c.isEndElement() then
-        errorIfWrongName[String](c, localName, namespaceUri).getOrElse:
+        errorIfWrongName[String](c, localName).getOrElse:
           c.next()
           ConstDecoder(stringBuilder.mkString)
       else if (c.getEventType() == AsyncXMLStreamReader.EVENT_INCOMPLETE) then
@@ -33,7 +33,7 @@ final class StringDecoder(string: String = "") extends ElementDecoder[String]:
     end go
 
     if c.isStartElement() && stringBuilder.isEmpty then
-      errorIfWrongName[String](c, localName, namespaceUri).getOrElse:
+      errorIfWrongName[String](c, localName).getOrElse:
         c.next()
         go()
     else go()
@@ -48,7 +48,7 @@ final class StringDecoder(string: String = "") extends ElementDecoder[String]:
 end StringDecoder
 
 final class ConstDecoder[A](a: A) extends ElementDecoder[A]:
-  def decodeAsElement(c: Cursor, localName: String, namespaceUri: Option[String]): ElementDecoder[A] =
+  def decodeAsElement(c: Cursor, localName: String): ElementDecoder[A] =
     new FailedDecoder[A](c.error("Element is already decoded (Most likely it occurred more than once)"))
 
   def result(history: List[String]): Either[DecodingError, A] = Right(a)
@@ -59,7 +59,7 @@ final class ConstDecoder[A](a: A) extends ElementDecoder[A]:
 end ConstDecoder
 
 final class FailedDecoder[A](decodingError: DecodingError) extends ElementDecoder[A]:
-  def decodeAsElement(c: Cursor, localName: String, namespaceUri: Option[String]): ElementDecoder[A] = this
+  def decodeAsElement(c: Cursor, localName: String): ElementDecoder[A] = this
 
   def result(history: List[String]): Either[DecodingError, A] = Left(decodingError)
 
@@ -69,23 +69,18 @@ final class FailedDecoder[A](decodingError: DecodingError) extends ElementDecode
 end FailedDecoder
 
 
-def errorIfWrongName[A](c: Cursor, localName: String, namespaceUri: Option[String]): Option[FailedDecoder[A]] = 
-  namespaceUri match 
-    case _ if c.getLocalName() != localName =>
-      Some(new FailedDecoder(c.error(s"Invalid local name. Expected '$localName', but found '${c.getLocalName()}'")))
-    case Some(uri) if uri != c.getNamespaceURI() =>
-      Some(new FailedDecoder(c.error(s"Invalid namespace. Expected '$uri', but found '${c.getNamespaceURI()}'")))
-    case None if c.getNamespaceURI() != "" =>
-      Some(new FailedDecoder(c.error(s"Invalid namespace. Expected no namespace, but found '${c.getNamespaceURI()}'")))
-    case _ => None
+def errorIfWrongName[A](c: Cursor, localName: String): Option[FailedDecoder[A]] = 
+  if c.getLocalName() != localName then
+    Some(new FailedDecoder(c.error(s"Invalid local name. Expected '$localName', but found '${c.getLocalName()}'")))
+  else None
 
 def isNil(c: Cursor): Boolean = 
   val nilIdx = c.getAttributeIndex("http://www.w3.org/2001/XMLSchema-instance", "nil")
   nilIdx > -1 && c.getAttributeValue(nilIdx) == "true"
 
 final class MappedDecoder[A, B](fa: ElementDecoder[A], f: A => B) extends ElementDecoder[B]:
-  def decodeAsElement(c: Cursor, localName: String, namespaceUri: Option[String]): ElementDecoder[B] =
-    new MappedDecoder(fa.decodeAsElement(c, localName, namespaceUri), f)
+  def decodeAsElement(c: Cursor, localName: String): ElementDecoder[B] =
+    new MappedDecoder(fa.decodeAsElement(c, localName), f)
 
   def result(history: List[String]): Either[DecodingError, B] = fa.result(history).map(f)
 
@@ -96,8 +91,8 @@ end MappedDecoder
 
 final class EMappedDecoder[A, B](fa: ElementDecoder[A], f: (List[String], A) => Either[DecodingError, B])
     extends ElementDecoder[B]:
-  def decodeAsElement(c: Cursor, localName: String, namespaceUri: Option[String]): ElementDecoder[B] =
-    new EMappedDecoder(fa.decodeAsElement(c, localName, namespaceUri), f)
+  def decodeAsElement(c: Cursor, localName: String): ElementDecoder[B] =
+    new EMappedDecoder(fa.decodeAsElement(c, localName), f)
 
   def result(history: List[String]): Either[DecodingError, B] =
     fa.result(history) match {
@@ -111,7 +106,7 @@ end EMappedDecoder
 class ListDecoder[A](list: List[A] = Nil, currentItemDecoderOpt: Option[ElementDecoder[A]] = None)(
     using itemDecoder: ElementDecoder[A])
     extends ElementDecoder[List[A]]:
-  def decodeAsElement(cursor: Cursor, localName: String, namespaceUri: Option[String]): ElementDecoder[List[A]] =
+  def decodeAsElement(cursor: Cursor, localName: String): ElementDecoder[List[A]] =
     if cursor.getEventType() == AsyncXMLStreamReader.EVENT_INCOMPLETE then
       this
     else
@@ -127,7 +122,7 @@ class ListDecoder[A](list: List[A] = Nil, currentItemDecoderOpt: Option[ElementD
             cursor.next()
             go(None)
           else
-            val newDecoder = decoder.decodeAsElement(cursor, localName, namespaceUri)
+            val newDecoder = decoder.decodeAsElement(cursor, localName)
             if newDecoder.isCompleted then
               newDecoder.result(cursor.history) match
                 case Right(a) =>
