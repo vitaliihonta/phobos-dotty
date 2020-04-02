@@ -5,7 +5,6 @@ import java.util.{Base64, UUID}
 
 import cats.{Contravariant, Foldable}
 import cats.data.{Chain, NonEmptyChain, NonEmptyList, NonEmptySet, NonEmptyVector}
-import org.codehaus.stax2.XMLStreamWriter2
 
 /**
  * Warning! This is an internal API which may change in future.
@@ -25,11 +24,11 @@ import org.codehaus.stax2.XMLStreamWriter2
  */
 trait ElementEncoder[A]:
   self =>
-  def encodeAsElement(a: A, sw: XMLStreamWriter2, localName: String, namespaceUri: Option[String]): Unit
+  def encodeAsElement(a: A, sw: PhobosStreamWriter, localName: String, namespaceUri: Option[String]): Unit
 
   def contramap[B](f: B => A): ElementEncoder[B] =
     new ElementEncoder[B]:
-      def encodeAsElement(b: B, sw: XMLStreamWriter2, localName: String, namespaceUri: Option[String]): Unit =
+      def encodeAsElement(b: B, sw: PhobosStreamWriter, localName: String, namespaceUri: Option[String]): Unit =
         self.encodeAsElement(f(b), sw, localName, namespaceUri)
 
 end ElementEncoder
@@ -44,7 +43,7 @@ object ElementEncoder:
     */
   given stringEncoder as ElementEncoder[String] =
     new ElementEncoder[String]:
-      def encodeAsElement(a: String, sw: XMLStreamWriter2, localName: String, namespaceUri: Option[String]): Unit =
+      def encodeAsElement(a: String, sw: PhobosStreamWriter, localName: String, namespaceUri: Option[String]): Unit =
         namespaceUri.fold(sw.writeStartElement(localName))(ns => sw.writeStartElement(ns, localName))
         sw.writeCharacters(a)
         sw.writeEndElement()
@@ -52,7 +51,7 @@ object ElementEncoder:
 
   given unitEncoder as ElementEncoder[Unit] =
     new ElementEncoder[Unit]:
-      def encodeAsElement(a: Unit, sw: XMLStreamWriter2, localName: String, namespaceUri: Option[String]): Unit = ()
+      def encodeAsElement(a: Unit, sw: PhobosStreamWriter, localName: String, namespaceUri: Option[String]): Unit = ()
 
   given booleanEncoder as ElementEncoder[Boolean]                     = stringEncoder.contramap(_.toString)
   given javaBooleanEncoder as ElementEncoder[java.lang.Boolean]       = booleanEncoder.contramap(_.booleanValue())
@@ -81,18 +80,18 @@ object ElementEncoder:
 
   given optionEncoder[A](using encoder: ElementEncoder[A]) as ElementEncoder[Option[A]] =
     new ElementEncoder[Option[A]]:
-      def encodeAsElement(a: Option[A], sw: XMLStreamWriter2, localName: String, namespaceUri: Option[String]): Unit =
+      def encodeAsElement(a: Option[A], sw: PhobosStreamWriter, localName: String, namespaceUri: Option[String]): Unit =
         a.foreach(encoder.encodeAsElement(_, sw, localName, namespaceUri))
 
   given foldableEncoder[F[_]: Foldable, A](using encoder: ElementEncoder[A]) as ElementEncoder[F[A]] =
     new ElementEncoder[F[A]]:
-      def encodeAsElement(vs: F[A], sw: XMLStreamWriter2, localName: String, namespaceUri: Option[String]): Unit =
+      def encodeAsElement(vs: F[A], sw: PhobosStreamWriter, localName: String, namespaceUri: Option[String]): Unit =
         Foldable[F].foldLeft(vs, ())((_, a) => encoder.encodeAsElement(a, sw, localName, namespaceUri))
 
   given iteratorEncoder[A](using encoder: ElementEncoder[A]) as ElementEncoder[Iterator[A]] =
     new ElementEncoder[Iterator[A]]:
       def encodeAsElement(vs: Iterator[A],
-                          sw: XMLStreamWriter2,
+                          sw: PhobosStreamWriter,
                           localName: String,
                           namespaceUri: Option[String]): Unit =
         vs.foreach(a => encoder.encodeAsElement(a, sw, localName, namespaceUri))

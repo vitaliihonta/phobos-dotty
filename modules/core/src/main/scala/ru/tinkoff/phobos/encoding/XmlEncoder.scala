@@ -30,7 +30,7 @@ trait XmlEncoder[A]:
     val os      = new ByteArrayOutputStream
     val factory = new OutputFactoryImpl
     factory.setProperty("javax.xml.stream.isRepairingNamespaces", true)
-    val sw = factory.createXMLStreamWriter(os, charset).asInstanceOf[XMLStreamWriter2]
+    val sw = new PhobosStreamWriter(factory.createXMLStreamWriter(os, charset).asInstanceOf[XMLStreamWriter2])
     sw.writeStartDocument()
     elementencoder.encodeAsElement(a, sw, localname, namespaceuri)
     sw.writeEndDocument()
@@ -64,9 +64,7 @@ object XmlEncoder:
     fromElementEncoder(localName, namespace.getNamespace.some)
 
   inline given derived[A] as XmlEncoder[A] =
-    given elemEncoder as ElementEncoder[A] = new ElementEncoder[A]:
-      override def encodeAsElement(a: A, sw: XMLStreamWriter2, localName: String, namespaceUri: Option[String]): Unit = 
-        println(ru.tinkoff.phobos.derivation.FetchGroup.get[A])
+    given elemEncoder as ElementEncoder[A] = ru.tinkoff.phobos.derivation.EncoderDerivation.derive[A]
     XmlEncoder.fromElementEncoder[A]("localName")
   end derived
 end XmlEncoder

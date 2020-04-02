@@ -4,7 +4,7 @@ import ru.tinkoff.phobos.derivation.FetchGroup
 import ru.tinkoff.phobos.syntax._
 import ru.tinkoff.phobos.encoding.XmlEncoder
 
-case class Foo(@attr bar: Int, @text s: String) derives XmlEncoder
+case class Foo(@attr @renamed("barbar") bar: Int, @text s: String) derives XmlEncoder
 
 @main def show = 
   val x = Foo(1, "lala")
